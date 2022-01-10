@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "my-vue3",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "node scripts/dev.js reactivity -f global -s"
   },
