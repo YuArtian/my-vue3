@@ -10,9 +10,9 @@ import { execa } from 'execa'
 import minimist from 'minimist'
 
 const { _, f, s } = minimist(process.argv.slice(2))
-// args { _: [ 'reactivity', 1, 2, 3 ], f: 'global', s: true }
+// args { _: [ 'reactivity', 1, 2, 3 ], f: 'iife', s: true }
 const target = _.length ? _ : 'reactivity'
-const formats = f || 'global'
+const formats = f || 'iife'
 const sourcemap = s || false
 
 console.log('target, formats, sourcemap', target, formats, sourcemap)
