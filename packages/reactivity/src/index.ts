@@ -1,4 +1,2 @@
-import { _test } from '@vue/shared'
-
-console.log('run reactivity')
-_test()
+export { reactive } from './reactive'
+export { effect } from './efftect'

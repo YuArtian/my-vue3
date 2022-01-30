@@ -1,3 +1,3 @@
-export function _test():any{
-  console.log('shared _test function')
+export function isObject(value: unknown) {
+ return typeof value === 'object' && value != null
 }
