@@ -12,3 +12,4 @@ function create_reactive_object(target: object){
 export function reactive (target: object) {
   return create_reactive_object(target)
 }
+
