@@ -9,12 +9,13 @@
 <body>
   <div id="app"></div>
   <!-- <script src="./reactivity.global.js"></script> -->
-  <script src="../dist//reactivity.global.js"></script>
+  <script src="../dist/reactivity.global.js"></script>
   <script>
     const { reactive, effect } = VueReactivity
     const state = reactive({ name: '111', age: 1 })
-
+    console.log('state', state)
     effect(() => {
+      console.log('state.age', state.age)
       app.innerHTML = state.name + '/' + state.age
     })
 
