@@ -1,16 +1,20 @@
 var VueReactivity = (function (exports) {
   'use strict';
 
-  function isObject(value) {
+  function is_object(value) {
       return typeof value === 'object' && value != null;
+  }
+  function is_function(value) {
+      return typeof value === 'function';
   }
 
   //全局的 effect 调用栈 和 当前effect
   let active_effect;
   let effect_stack = [];
   class ReactiveEffect {
-      constructor(fn) {
+      constructor(fn, scheduler) {
           this.fn = fn;
+          this.scheduler = scheduler;
           this.active = true;
           this.deps = [];
       }
@@ -22,7 +26,7 @@ var VueReactivity = (function (exports) {
           if (!effect_stack.includes(this)) {
               try {
                   effect_stack.push(active_effect = this);
-                  this.fn(); //执行fn的时候，会触发取值 get
+                  return this.fn(); //执行fn的时候，会触发取值 get
               }
               finally {
                   effect_stack.pop();
@@ -60,6 +64,10 @@ var VueReactivity = (function (exports) {
       if (!dep) {
           deps_map.set(key, (dep = new Set()));
       }
+      track_effect(dep);
+  }
+  //收集属性
+  function track_effect(dep) {
       let should_track = !dep.has(active_effect);
       if (should_track) {
           dep.add(active_effect); //一个属性对应多个 effect
@@ -84,8 +92,16 @@ var VueReactivity = (function (exports) {
       for (const dep of deps) {
           effects.push(...dep);
       }
+      trigger_effects(effects);
+  }
+  //触发 effects 执行
+  function trigger_effects(effects) {
       for (const effect of effects) {
           if (effect !== active_effect) { //防止循环
+              //设置值的时候 不触发 computed effect 的 get了，改为执行 scheduler
+              if (effect.scheduler) {
+                  return effect.scheduler();
+              }
               effect.run();
           }
       }
@@ -121,7 +137,7 @@ var VueReactivity = (function (exports) {
   // 缓存 对同一个对象 重复 reactive，是相等的
   const reactive_map = new WeakMap();
   function create_reactive_object(target) {
-      if (!isObject(target))
+      if (!is_object(target))
           return target;
       if (target["__v_isReactive" /* IS_REACTIVE */]) {
           return target;
@@ -138,6 +154,50 @@ var VueReactivity = (function (exports) {
       return create_reactive_object(target);
   }
 
+  class ComputedRefImpl {
+      constructor(getter, _setter) {
+          this._setter = _setter;
+          this._dirty = true;
+          this.__v_isRef = true;
+          this.effect = new ReactiveEffect(getter, () => {
+              // 在 scheduler 中将 _dirty 重置为 true，并且触发 计算属性 相关的 effect 执行
+              if (!this._dirty) {
+                  this._dirty = true;
+                  trigger_effects(this.dep);
+              }
+          });
+      }
+      get value() {
+          if (is_tracking()) {
+              track_effect(this.dep || (this.dep = new Set()));
+          }
+          if (this._dirty) {
+              console.log('ComputedRefImpl get');
+              this._value = this.effect.run();
+              this._dirty = false;
+          }
+          return this._value;
+      }
+      set value(new_value) {
+          this._setter(new_value);
+      }
+  }
+  function computed(getter_or_options) {
+      const only_getter = is_function(getter_or_options);
+      let getter;
+      let setter;
+      if (only_getter) {
+          getter = getter_or_options;
+          setter = () => { };
+      }
+      else {
+          getter = getter_or_options.get;
+          setter = getter_or_options.set;
+      }
+      return new ComputedRefImpl(getter, setter);
+  }
+
+  exports.computed = computed;
   exports.effect = effect;
   exports.reactive = reactive;
 

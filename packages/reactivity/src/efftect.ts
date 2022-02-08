@@ -5,10 +5,11 @@ let active_effect: ReactiveEffect | undefined
 let effect_stack:[] = []
 
 
-class ReactiveEffect<T = any> {
+export class ReactiveEffect<T = any> {
   active = true
   deps:Set<ReactiveEffect>[] = []
-  constructor(public fn: () => T){
+
+  constructor(public fn: () => T, public scheduler?){
 
   }
   //运行
@@ -19,7 +20,7 @@ class ReactiveEffect<T = any> {
     if(!effect_stack.includes(this as never)) {
       try {
         effect_stack.push(active_effect = this as never)
-        this.fn() //执行fn的时候，会触发取值 get
+        return this.fn() //执行fn的时候，会触发取值 get
       } finally {
         effect_stack.pop()
         active_effect = effect_stack[effect_stack.length -1]
@@ -58,6 +59,10 @@ export function track (target:{}, key:unknown) {
   if (!dep) {
     deps_map.set(key, (dep = new Set()))
   }
+  track_effect(dep)
+}
+//收集属性
+export function track_effect(dep){
   let should_track = !dep.has(active_effect)
   if (should_track) {
     dep.add(active_effect) //一个属性对应多个 effect
@@ -83,8 +88,17 @@ export function trigger (target:{}, key:unknown) {
   for (const dep of deps) {
     effects.push(...dep)
   }
+  trigger_effects(effects)
+}
+
+//触发 effects 执行
+export function trigger_effects (effects) {
   for (const effect of effects) {
     if(effect !== active_effect) { //防止循环
+      //设置值的时候 不触发 computed effect 的 get了，改为执行 scheduler
+      if (effect.scheduler) {
+        return effect.scheduler()
+      }
       effect.run()
     }
   }

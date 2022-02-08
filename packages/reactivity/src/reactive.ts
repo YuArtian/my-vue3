@@ -1,4 +1,4 @@
-import { isObject } from "@vue/shared";
+import { is_object } from "@vue/shared";
 import { track, trigger } from "./efftect";
 
 const enum REACTIVE_FLAGS {
@@ -30,7 +30,7 @@ const proxy_handler:ProxyHandler<object> = {
 const reactive_map = new WeakMap()
 
 function create_reactive_object(target: object){
-  if (!isObject(target)) return target
+  if (!is_object(target)) return target
 
   if((target as any)[REACTIVE_FLAGS.IS_REACTIVE]) {
     return target
