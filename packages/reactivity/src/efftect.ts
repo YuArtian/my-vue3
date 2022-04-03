@@ -9,9 +9,7 @@ export class ReactiveEffect<T = any> {
   active = true
   deps:Set<ReactiveEffect>[] = []
 
-  constructor(public fn: () => T, public scheduler?){
-
-  }
+  constructor(public fn: () => T, public scheduler?){}
   //运行
   run(){
     if (!this.active) {

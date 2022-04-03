@@ -176,6 +176,7 @@ var VueReactivity = (function (exports) {
               this._value = this.effect.run();
               this._dirty = false;
           }
+          console.log('this _value', this._value);
           return this._value;
       }
       set value(new_value) {
