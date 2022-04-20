@@ -6,7 +6,7 @@ let effect_stack:[] = []
 
 
 export class ReactiveEffect<T = any> {
-  active = true
+  public active = true
   deps:Set<ReactiveEffect>[] = []
 
   constructor(public fn: () => T, public scheduler?){}
@@ -44,7 +44,9 @@ function cleanup_effect(effect: ReactiveEffect) {
 }
 
 const target_map = new WeakMap()
+
 //依赖收集
+// WeakMap = { 对象(target): Map{ 属性：Set[ effect ] } }
 export function track (target:{}, key:unknown) {
   if (!is_tracking()) {
     return

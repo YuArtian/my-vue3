@@ -50,3 +50,20 @@ export function reactive (target: object) {
   return create_reactive_object(target)
 }
 
+
+/* let state = {
+  count: 1,
+  get alias (){
+    return this.count
+  }
+}
+
+const proxy = new Proxy(state, {
+  get: function(target, key, recevier){
+    console.log('key', key)
+    return target[key]
+  },
+})
+
+proxy.alias */
+

@@ -52,6 +52,7 @@ var VueReactivity = (function (exports) {
   }
   const target_map = new WeakMap();
   //依赖收集
+  // WeakMap = { 对象(target): Map{ 属性：Set[ effect ] } }
   function track(target, key) {
       if (!is_tracking()) {
           return;
@@ -153,6 +154,21 @@ var VueReactivity = (function (exports) {
   function reactive(target) {
       return create_reactive_object(target);
   }
+  /* let state = {
+    count: 1,
+    get alias (){
+      return this.count
+    }
+  }
+
+  const proxy = new Proxy(state, {
+    get: function(target, key, recevier){
+      console.log('key', key)
+      return target[key]
+    },
+  })
+
+  proxy.alias */
 
   class ComputedRefImpl {
       constructor(getter, _setter) {

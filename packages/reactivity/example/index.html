@@ -11,26 +11,14 @@
   <!-- <script src="./reactivity.global.js"></script> -->
   <script src="../dist/reactivity.global.js"></script>
   <script>
-    const { reactive, effect, computed } = VueReactivity
-    const state = reactive({ name: '111', age: 1 })
-    console.log('state', state)
-    effect(() => {
-      console.log('effect1 ---- state.age', state.age)
-      app.innerHTML = state.name + '/' + state.age
-    })
-
-    setTimeout(() => {
-      console.log('setTimeout::::')
-      state.age = 100
+    const { reactive, effect } = VueReactivity;
+    const state = reactive({ count: 0 })
+    effect(() => { // 副作用函数 (effect执行渲染了页面)
+        app.innerHTML = state.count
+    });
+    setInterval(() => {
+        state.count++;
     }, 1000)
-
-    const my_age = computed(() => {
-      return state.age + 10
-    })
-    console.log('out ---- my_age', my_age.value)
-    effect(() => {
-      console.log('effect2 ---- my_age', my_age.value)
-    })
 
   </script>
 </body>
